@@ -120,7 +120,7 @@
         <button id="save-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-teal-600 hover:bg-teal-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
           <i data-lucide="save" class="mr-2"></i> Guardar Lick
         </button>
-        <button id="export-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
+        <button id="export-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
           <i data-lucide="download" class="mr-2"></i> Exportar
         </button>
       </div>
@@ -151,7 +151,7 @@
       <div class="bg-red-800 text-white p-6 rounded-xl shadow-2xl flex flex-col items-center space-y-4">
           <i data-lucide="alert-triangle" class="w-16 h-16 text-yellow-400"></i>
           <h2 class="text-2xl font-bold">¡Ha ocurrido un error!</h2>
-          <p id="error-details" class="text-center text-red-200">La aplicación no pudo cargar correctamente. Por favor, inténtalo de nuevo.</p>
+          <p id="error-details" class="text-center text-red-200">La aplicación no pudo cargar correctamente. Por favor, recarga la página.</p>
       </div>
   </div>
   
@@ -225,6 +225,21 @@
       'V7/VI (Mixolidio b2 b6)': { 0: '1', 1: 'b2', 4: '3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' }
     };
     
+    // New mapping for extended degrees
+    const degreeMap = {
+      '2': '9',
+      'b2': 'b9',
+      '4': '11',
+      '#4': '#11',
+      '6': '13',
+      'b6': 'b13',
+    };
+
+    // Helper function to apply the degree map
+    function getDisplayIntervalName(originalInterval) {
+        return degreeMap[originalInterval] || originalInterval;
+    }
+
     // Funciones de utilidad para lógica musical
     function isSharpKey(root) {
       return ['C', 'C#', 'D', 'E', 'F#', 'G', 'A', 'B'].includes(root);
@@ -290,8 +305,6 @@
           scaleNameDisplay = 'Escala Mixolidia b2 b6';
       } else if (selectedModeType.includes('Mixolidio')) {
           scaleNameDisplay = 'Escala Mixolidia';
-      } else if (selectedModeType.includes('Dorico')) {
-          scaleNameDisplay = 'Escala Dórica';
       } else {
           scaleNameDisplay = `Escala ${selectedModeType.split('(')[1].replace(')', '')}`;
       }
@@ -318,11 +331,12 @@
         <div class="flex justify-center flex-wrap gap-4 mt-4">
           ${modeNotes.map((note, index) => {
             const semitoneOffset = modeFormula[index];
-            const intervalName = INTERVAL_MAPS_BY_MODE[selectedModeType][semitoneOffset];
+            const originalIntervalName = INTERVAL_MAPS_BY_MODE[selectedModeType][semitoneOffset];
+            const displayIntervalName = getDisplayIntervalName(originalIntervalName);
             return `
               <div class="flex flex-col items-center p-2 rounded-lg border-2 border-transparent">
                 <span class="font-mono text-2xl font-bold text-green-300">${note}</span>
-                <span class="text-sm text-gray-400">${intervalName}</span>
+                <span class="text-sm text-gray-400">${displayIntervalName}</span>
               </div>
             `;
           }).join('')}
@@ -341,13 +355,16 @@
         if (exportBtn) exportBtn.disabled = true;
         return;
       }
+      
+      // Apply the new degree map when rendering
+      const displayIntervals = randomLickIntervals.map(getDisplayIntervalName);
 
       lickDisplay.innerHTML = `
         <div class="flex justify-center flex-wrap gap-4 mt-4" id="random-lick-notes-container">
           ${randomLick.map((note, index) => `
             <div id="random-note-${index}" class="flex flex-col items-center p-2 rounded-lg border-2 transition-all duration-300 border-transparent">
               <span class="font-mono text-2xl font-bold text-yellow-300">${note}</span>
-              <span class="text-sm text-gray-400">${randomLickIntervals[index]}</span>
+              <span class="text-sm text-gray-400">${displayIntervals[index]}</span>
             </div>
           `).join('')}
         </div>
@@ -399,6 +416,7 @@
         }
         
         const displayModeName = getDisplayModeName(lick.mode);
+        const displayIntervals = lick.intervals.map(getDisplayIntervalName);
 
         lickElement.innerHTML = `
           <div class="flex-grow" id="saved-lick-content-${lickIndex}">
@@ -409,7 +427,7 @@
               ${lick.notes.map((note, noteIndex) => `
                 <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-1 rounded-md border-2 transition-all duration-300 border-transparent">
                   <span class="font-mono text-xl text-yellow-300">${note}</span>
-                  <span class="text-xs text-gray-400">${lick.intervals[noteIndex]}</span>
+                  <span class="text-xs text-gray-400">${displayIntervals[noteIndex]}</span>
                 </div>
               `).join('')}
             </div>
