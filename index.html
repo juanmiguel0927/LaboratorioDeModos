@@ -186,6 +186,7 @@
       'm(b6) / maj7/3 (Eólico)': [0, 3, 7, 8],
       '7(sus4) (Frigio)': [0, 5, 7, 10],
       'm7(b5) (Locrio)': [0, 3, 6, 10],
+      'SubV7 (Sustituto tritonal)': [0, 4, 7, 10],
       'V7/II (Mixolidio b13)': [0, 4, 7, 10],
       'V7/III (Mixolidio b9 b13)': [0, 4, 7, 10],
       'V7/IV (Mixolidio)': [0, 4, 7, 10],
@@ -202,6 +203,7 @@
       'm(b6) / maj7/3 (Eólico)': [0, 2, 3, 5, 7, 8, 10],
       '7(sus4) (Frigio)': [0, 1, 3, 5, 7, 8, 10],
       'm7(b5) (Locrio)': [0, 1, 3, 5, 6, 8, 10],
+      'SubV7 (Sustituto tritonal)': [0, 2, 4, 6, 7, 9, 10],
       'V7/II (Mixolidio b13)': [0, 2, 4, 5, 7, 8, 10],
       'V7/III (Mixolidio b9 b13)': [0, 1, 4, 5, 7, 8, 10],
       'V7/IV (Mixolidio)': [0, 2, 4, 5, 7, 9, 10],
@@ -218,6 +220,7 @@
       'm(b6) / maj7/3 (Eólico)': { 0: '1', 2: '2', 3: 'b3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
       '7(sus4) (Frigio)': { 0: '1', 1: 'b2', 3: 'b3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
       'm7(b5) (Locrio)': { 0: '1', 1: 'b2', 3: 'b3', 5: '4', 6: 'b5', 8: 'b6', 10: 'b7' },
+      'SubV7 (Sustituto tritonal)': { 0: '1', 2: '2', 4: '3', 6: '#4', 7: '5', 9: '6', 10: 'b7' },
       'V7/II (Mixolidio b13)': { 0: '1', 2: '2', 4: '3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
       'V7/III (Mixolidio b9 b13)': { 0: '1', 1: 'b2', 4: '3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' },
       'V7/IV (Mixolidio)': { 0: '1', 2: '2', 4: '3', 5: '4', 7: '5', 9: '6', 10: 'b7' },
@@ -225,22 +228,14 @@
       'V7/VI (Mixolidio b9 b13)': { 0: '1', 1: 'b2', 4: '3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' }
     };
     
-    // New mapping for extended degrees
     const degreeMap = {
-      '2': '9',
-      'b2': 'b9',
-      '4': '11',
-      '#4': '#11',
-      '6': '13',
-      'b6': 'b13',
+      '2': '9', 'b2': 'b9', '4': '11', '#4': '#11', '6': '13', 'b6': 'b13',
     };
 
-    // Helper function to apply the degree map
     function getDisplayIntervalName(originalInterval) {
         return degreeMap[originalInterval] || originalInterval;
     }
 
-    // Funciones de utilidad para lógica musical
     function isSharpKey(root) {
       return ['C', 'C#', 'D', 'E', 'F#', 'G', 'A', 'B'].includes(root);
     }
@@ -251,21 +246,17 @@
       const rootSemitone = NOTE_TO_SEMITONE_MAP[root];
       const modeIntervals = INTERVAL_MAPS_BY_MODE[modeType];
 
-      const notes = intervals.map(intervalSemitone => {
+      return intervals.map(intervalSemitone => {
         const noteIndex = (rootSemitone + intervalSemitone) % 12;
         let noteName = chromaticScale[noteIndex];
         
         if (modeIntervals && modeIntervals[intervalSemitone]) {
           const intervalLabel = modeIntervals[intervalSemitone];
-          if (intervalLabel.includes('#')) {
-            noteName = CHROMATIC_SHARPS[noteIndex];
-          } else if (intervalLabel.includes('b')) {
-            noteName = CHROMATIC_FLATS[noteIndex];
-          }
+          if (intervalLabel.includes('#')) noteName = CHROMATIC_SHARPS[noteIndex];
+          else if (intervalLabel.includes('b')) noteName = CHROMATIC_FLATS[noteIndex];
         }
         return noteName;
       });
-      return notes;
     }
     
     function getIntervalName(modeType, rootNote, targetNote) {
@@ -273,11 +264,9 @@
       const targetSemitone = NOTE_TO_SEMITONE_MAP[targetNote];
       if (rootSemitone === undefined || targetSemitone === undefined) return 'Error';
       const semitoneOffset = (targetSemitone - rootSemitone + 12) % 12;
-      const intervalMap = INTERVAL_MAPS_BY_MODE[modeType];
-      return intervalMap[semitoneOffset] || 'Error';
+      return INTERVAL_MAPS_BY_MODE[modeType][semitoneOffset] || 'Error';
     }
 
-    // Funciones de renderizado UI
     function updateScaleAndChordDisplay(selectedRoot, selectedModeType) {
       const modeFormula = MODE_FORMULAS[selectedModeType];
       const chordFormula = CHORD_FORMULAS[selectedModeType];
@@ -287,66 +276,52 @@
       
       const resultsSection = document.getElementById('results-section');
       
-      // Lógica para el nombre de la escala según el tipo de modo
       let scaleNameDisplay;
-      if (selectedModeType.includes('Eólico')) {
-          scaleNameDisplay = 'Escala Eólica';
+      if (selectedModeType.includes('SubV7')) {
+          scaleNameDisplay = 'Mixolidia #11 (Lidio b7) (4to modo de la escala menor melódica)';
+      } else if (selectedModeType.includes('Eólico')) {
+          scaleNameDisplay = 'Eólica';
       } else if (selectedModeType.includes('Frigio')) {
-          scaleNameDisplay = 'Escala Frigia';
+          scaleNameDisplay = 'Frigio';
       } else if (selectedModeType.includes('Locrio')) {
-          scaleNameDisplay = 'Escala Locria';
-      } else if (selectedModeType.includes('jónico')) {
-          scaleNameDisplay = 'Escala Jónica';
-      } else if (selectedModeType.includes('Lidio')) {
-          scaleNameDisplay = 'Escala Lidia';
+          scaleNameDisplay = 'Locrio';
       } else if (selectedModeType.includes('Mixolidio b9 b13')) {
           scaleNameDisplay = 'Escala Mixolidia b9 b13 (5to modo de la escala menor armónica)';
       } else if (selectedModeType.includes('Mixolidio b13')) {
           scaleNameDisplay = 'Escala Mixolidia b13 (5to modo de la escala menor melodica)';
-      } else if (selectedModeType.includes('Mixolidio')) {
-          scaleNameDisplay = 'Escala Mixolidia';
-      } else if (selectedModeType.includes('Dórico')) {
-          scaleNameDisplay = 'Escala Dórica';
       } else {
           scaleNameDisplay = `Escala ${selectedModeType.split('(')[1].replace(')', '')}`;
       }
       
-      // Lógica para el nombre del acorde, con las correcciones solicitadas
       let chordName;
-      if (selectedModeType.includes('m(b6) / maj7/3 (Eólico)')) {
-          chordName = 'm(b6)';
-      } else if (selectedModeType.includes('m7(b5) (Locrio)')) {
-          chordName = 'm7(b5)';
-      } else if (selectedModeType.includes('V7/')) {
+      if (selectedModeType.includes('SubV7') || selectedModeType.includes('V7/')) {
           chordName = '7';
+      } else if (selectedModeType.includes('m(b6)')) {
+          chordName = 'm(b6)';
+      } else if (selectedModeType.includes('m7(b5)')) {
+          chordName = 'm7(b5)';
       } else {
           chordName = selectedModeType.split('(')[0].trim();
-          if (selectedModeType.includes('sus4')) {
-              chordName += '(sus4)';
-          }
+          if (selectedModeType.includes('sus4')) chordName += '(sus4)';
       }
-      
+
       resultsSection.innerHTML = `
         <div class="flex justify-center items-center mb-4 space-x-2">
-          <h2 class="text-3xl font-extrabold text-white">
-            ${selectedRoot} ${chordName}
-          </h2>
+          <h2 class="text-3xl font-extrabold text-white">${selectedRoot} ${chordName}</h2>
         </div>
         <p class="text-center text-lg text-gray-300 mb-4 font-semibold">
           Acorde: <span class="font-mono text-xl text-yellow-300">${chordNotes.join(', ')}</span>
         </p>
         <hr class="border-gray-600 my-4" />
-        <p class="text-center text-lg text-gray-300 mb-2">
-          ${scaleNameDisplay}:
-        </p>
+        <p class="text-center text-lg text-gray-300 mb-2">${scaleNameDisplay}:</p>
         <div class="flex justify-center flex-wrap gap-4 mt-4">
           ${modeNotes.map((note, index) => {
             const semitoneOffset = modeFormula[index];
             const originalIntervalName = INTERVAL_MAPS_BY_MODE[selectedModeType][semitoneOffset];
             const displayIntervalName = getDisplayIntervalName(originalIntervalName);
             return `
-              <div class="flex flex-col items-center p-2 rounded-lg border-2 border-transparent">
-                <span class="font-mono text-2xl font-bold text-green-300">${note}</span>
+              <div class="flex flex-col items-center p-2 rounded-lg bg-gray-800 w-20">
+                <span class="text-2xl font-bold text-teal-300">${note}</span>
                 <span class="text-sm text-gray-400">${displayIntervalName}</span>
               </div>
             `;
@@ -354,32 +329,28 @@
         </div>
       `;
     }
-    
-    function renderRandomLick() {
-      const lickDisplay = document.getElementById('random-lick-display');
-      const saveBtn = document.getElementById('save-lick-btn');
-      const exportBtn = document.getElementById('export-lick-btn');
 
+    function renderRandomLick() {
+      const display = document.getElementById('random-lick-display');
       if (randomLick.length === 0) {
-        lickDisplay.innerHTML = '';
-        if (saveBtn) saveBtn.disabled = true;
-        if (exportBtn) exportBtn.disabled = true;
+        display.innerHTML = '<p class="text-gray-400">Genera un lick para empezar.</p>';
+        document.getElementById('save-lick-btn').disabled = true;
+        document.getElementById('export-lick-btn').disabled = true;
         return;
       }
       
-      // Apply the new degree map when rendering
       const displayIntervals = randomLickIntervals.map(getDisplayIntervalName);
 
-      lickDisplay.innerHTML = `
-        <div class="flex justify-center flex-wrap gap-4 mt-4" id="random-lick-notes-container">
+      display.innerHTML = `
+        <div id="random-lick-notes-container" class="flex flex-wrap justify-center gap-2 mb-4 p-4 bg-gray-800 rounded-lg">
           ${randomLick.map((note, index) => `
-            <div id="random-note-${index}" class="flex flex-col items-center p-2 rounded-lg border-2 transition-all duration-300 border-transparent">
-              <span class="font-mono text-2xl font-bold text-yellow-300">${note}</span>
+            <div id="random-note-${index}" class="flex flex-col items-center p-2 rounded-lg bg-gray-900 w-20 transition-all duration-200">
+              <span class="text-2xl font-bold text-yellow-300">${note}</span>
               <span class="text-sm text-gray-400">${displayIntervals[index]}</span>
             </div>
           `).join('')}
         </div>
-        <div class="flex justify-center mt-4">
+        <div class="flex justify-center items-center">
           <button id="play-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
             <i data-lucide="play" class="mr-2 play-icon"></i>
             <i data-lucide="stop-circle" class="mr-2 stop-icon hidden"></i>
@@ -387,31 +358,22 @@
           </button>
         </div>
       `;
-      // Vuelve a crear los íconos de Lucide
+      
       lucide.createIcons();
-
-      // Desactivar el botón de guardar si no hay lick
       document.getElementById('save-lick-btn').disabled = false;
       document.getElementById('export-lick-btn').disabled = false;
       
-      // Añadir listener al botón de reproducir
-      document.getElementById('play-lick-btn').addEventListener('click', () => {
-        playLick(randomLick);
-      });
+      document.getElementById('play-lick-btn').addEventListener('click', () => playLick(randomLick));
     }
 
     function getDisplayModeName(modeString) {
+      if (modeString.includes('SubV7')) return 'Mixolidia #11';
       if (modeString.includes('Eólico')) return 'Eólica';
-      if (modeString.includes('Frigio')) return 'Frigia';
-      if (modeString.includes('Locrio')) return 'Locria';
-      if (modeString.includes('jónico')) return 'Jónica';
-      if (modeString.includes('Lidio')) return 'Lidia';
-      // Cambios realizados aquí para los nombres de los modos
-      if (modeString.includes('Mixolidio b9 b13')) return 'Mixolidia b9 b13 (5to modo de la escala menor armónica)';
-      if (modeString.includes('Mixolidio b13')) return 'Mixolidia b13 (5to modo de la escala menor melodica)';
-      if (modeString.includes('Mixolidio')) return 'Mixolidia';
-      if (modeString.includes('Dórico')) return 'Dórica';
-      return 'Modo';
+      if (modeString.includes('Frigio')) return 'Frigio';
+      if (modeString.includes('Locrio')) return 'Locrio';
+      if (modeString.includes('Mixolidio b9 b13')) return 'Mixolidia b9 b13';
+      if (modeString.includes('Mixolidio b13')) return 'Mixolidia b13';
+      return modeString.split('(')[1]?.replace(')', '') || 'Modo';
     }
 
     function renderSavedLicks() {
@@ -423,19 +385,17 @@
         lickElement.className = 'bg-gray-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between shadow-md';
         
         let chordName;
-        if (lick.mode.includes('m(b6) / maj7/3 (Eólico)')) {
-            chordName = 'm(b6)';
-        } else if (lick.mode.includes('m7(b5) (Locrio)')) {
-            chordName = 'm7(b5)';
-        } else if (lick.mode.includes('V7/')) {
+        if (lick.mode.includes('SubV7') || lick.mode.includes('V7/')) {
             chordName = '7';
+        } else if (lick.mode.includes('m(b6)')) {
+            chordName = 'm(b6)';
+        } else if (lick.mode.includes('m7(b5)')) {
+            chordName = 'm7(b5)';
         } else {
             chordName = lick.mode.split('(')[0].trim();
-            if (lick.mode.includes('sus4')) {
-                chordName += '(sus4)';
-            }
+            if (lick.mode.includes('sus4')) chordName += '(sus4)';
         }
-        
+
         const displayModeName = getDisplayModeName(lick.mode);
         const displayIntervals = lick.intervals.map(getDisplayIntervalName);
 
@@ -444,47 +404,40 @@
             <p class="text-lg font-bold text-teal-300 mb-2">
               ${lick.root} ${chordName} (${displayModeName}) Lick
             </p>
-            <div id="saved-lick-notes-${lickIndex}" class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2">
               ${lick.notes.map((note, noteIndex) => `
-                <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-1 rounded-md border-2 transition-all duration-300 border-transparent">
-                  <span class="font-mono text-xl text-yellow-300">${note}</span>
+                <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-2 rounded-lg bg-gray-900 w-20 transition-all duration-200">
+                  <span class="text-xl font-bold text-yellow-300">${note}</span>
                   <span class="text-xs text-gray-400">${displayIntervals[noteIndex]}</span>
                 </div>
               `).join('')}
             </div>
           </div>
-          <div class="flex flex-wrap space-x-2 mt-4 md:mt-0 justify-end">
-            <button id="play-saved-lick-btn-${lickIndex}" class="p-3 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
+          <div class="flex items-center space-x-2 mt-4 md:mt-0 md:ml-4">
+            <button id="play-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
               <i data-lucide="play" class="play-icon"></i>
               <i data-lucide="stop-circle" class="stop-icon hidden"></i>
             </button>
-            <button id="export-saved-lick-btn-${lickIndex}" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button id="export-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400">
               <i data-lucide="download"></i>
             </button>
-            <button id="delete-saved-lick-btn-${lickIndex}" class="p-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400">
+            <button id="delete-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-red-400">
               <i data-lucide="trash-2"></i>
             </button>
           </div>
         `;
         container.appendChild(lickElement);
+      });
 
-        // Vuelve a crear los íconos de Lucide
-        lucide.createIcons();
+      lucide.createIcons();
 
-        // Añadir listeners para los botones de reproducir, borrar y exportar
-        document.getElementById(`play-saved-lick-btn-${lickIndex}`).addEventListener('click', () => {
-          playLick(lick.notes, lickIndex);
-        });
-        document.getElementById(`delete-saved-lick-btn-${lickIndex}`).addEventListener('click', () => {
-          deleteSavedLick(lickIndex);
-        });
-        document.getElementById(`export-saved-lick-btn-${lickIndex}`).addEventListener('click', () => {
-          exportLickAsImage(`saved-lick-content-${lickIndex}`);
-        });
+      savedLicks.forEach((lick, lickIndex) => {
+        document.getElementById(`play-saved-lick-btn-${lickIndex}`).addEventListener('click', () => playLick(lick.notes, lickIndex));
+        document.getElementById(`delete-saved-lick-btn-${lickIndex}`).addEventListener('click', () => deleteSavedLick(lickIndex));
+        document.getElementById(`export-saved-lick-btn-${lickIndex}`).addEventListener('click', () => exportLickAsImage(`saved-lick-content-${lickIndex}`));
       });
     }
 
-    // Funciones principales de la aplicación
     function stopLick() {
       if (lickSequence) {
         lickSequence.dispose();
@@ -503,33 +456,34 @@
       stopLick();
       const selectedRoot = document.getElementById('root-note').value;
       const selectedModeType = document.getElementById('mode-type').value;
-      
       const modeFormula = MODE_FORMULAS[selectedModeType];
       const modeNotes = getCorrectlySpelledNotes(selectedRoot, modeFormula, selectedModeType);
-      
       if (modeNotes.length === 0) return;
-      
+
+      // Crear una copia de las notas para elegir sin repetición
       const availableNotes = [...modeNotes];
-      // Obtener el valor del slider para la longitud del lick
+
       const lickLength = parseInt(document.getElementById('lick-length-slider').value, 10);
-      
       randomLick = [];
       randomLickIntervals = [];
-
-      const finalLickLength = Math.min(lickLength, availableNotes.length);
       
+      // Asegurarse de que la longitud del lick no exceda las notas disponibles
+      const finalLickLength = Math.min(lickLength, availableNotes.length);
+
       for (let i = 0; i < finalLickLength; i++) {
+        // Elegir un índice aleatorio de las notas *restantes*
         const randomIndex = Math.floor(Math.random() * availableNotes.length);
         const noteName = availableNotes[randomIndex];
+        
         randomLick.push(noteName);
-        const intervalName = getIntervalName(selectedModeType, selectedRoot, noteName);
-        randomLickIntervals.push(intervalName);
+        randomLickIntervals.push(getIntervalName(selectedModeType, selectedRoot, noteName));
+
+        // Eliminar la nota elegida para que no se pueda volver a seleccionar
         availableNotes.splice(randomIndex, 1);
       }
-      
       renderRandomLick();
     }
-    
+
     async function playLick(lickToPlay, lickIndex = null) {
       if (isLickPlaying && currentLickPlayingIndex === lickIndex) {
         stopLick();
@@ -537,12 +491,13 @@
       } else if (isLickPlaying) {
         stopLick();
       }
-      
+
       if (!synth || lickToPlay.length === 0) return;
-      
+
       isLickPlaying = true;
       currentLickPlayingIndex = lickIndex;
       updatePlayButtons();
+
       await Tone.start();
       Tone.Transport.start();
 
@@ -554,120 +509,87 @@
         updateHighlightedNotes();
         synth.triggerAttackRelease(note, noteDuration, time);
       }, sequenceNotes, noteDuration);
-      
+
       lickSequence.start(0);
       Tone.Transport.bpm.value = 120;
       
       const totalDuration = Tone.Time(noteDuration).toSeconds() * lickToPlay.length;
-      
-      Tone.Transport.scheduleOnce(() => {
-        console.log('Lick finalizado. Deteniendo la reproducción.');
-        stopLick();
-      }, `+${totalDuration}`);
+      Tone.Transport.scheduleOnce(() => stopLick(), `+${totalDuration}`);
     }
 
     function saveCurrentLick() {
       if (randomLick.length === 0) return;
-      const newLickToSave = {
-        notes: randomLick,
-        intervals: randomLickIntervals,
+      savedLicks.push({
+        notes: [...randomLick],
+        intervals: [...randomLickIntervals],
         root: document.getElementById('root-note').value,
         mode: document.getElementById('mode-type').value
-      };
-      savedLicks.push(newLickToSave);
+      });
       localStorage.setItem('savedModesLicks', JSON.stringify(savedLicks));
       renderSavedLicks();
     }
 
     function deleteSavedLick(indexToDelete) {
-      if (isLickPlaying && currentLickPlayingIndex === indexToDelete) {
-        stopLick();
-      }
       savedLicks.splice(indexToDelete, 1);
       localStorage.setItem('savedModesLicks', JSON.stringify(savedLicks));
       renderSavedLicks();
     }
-
-    // Función de exportar como imagen PNG
-    function exportLickAsImage(lickId) {
-      const lickElement = document.getElementById(lickId);
-      if (!lickElement) {
-          console.error(`Elemento con id "${lickId}" no encontrado.`);
-          return;
-      }
+    
+    function exportLickAsImage(containerId) {
+      const lickContainer = document.getElementById(containerId);
+      if (!lickContainer) return;
       
-      // html2canvas no captura el fondo del body, por lo que creamos un div temporal
       const tempWrapper = document.createElement('div');
-      tempWrapper.style.backgroundColor = '#1f2937'; // Color de fondo del body
-      tempWrapper.style.padding = '20px';
-      tempWrapper.style.borderRadius = '1rem';
+      const clone = lickContainer.cloneNode(true);
+      
+      tempWrapper.style.padding = '2rem';
+      tempWrapper.style.backgroundColor = '#1f2937';
       tempWrapper.style.display = 'inline-block';
-      
-      const clone = lickElement.cloneNode(true);
-      clone.style.width = lickElement.offsetWidth + 'px';
-      clone.style.height = lickElement.offsetHeight + 'px';
-      
-      // Aplicar estilos del contenedor
-      const containerStyles = window.getComputedStyle(lickElement.parentElement);
-      clone.style.backgroundColor = containerStyles.backgroundColor;
-      clone.style.padding = containerStyles.padding;
-      clone.style.borderRadius = containerStyles.borderRadius;
-      
       tempWrapper.appendChild(clone);
       document.body.appendChild(tempWrapper);
-      
-      html2canvas(tempWrapper, {
-          backgroundColor: '#111827', // Fondo del elemento padre, para que el resultado sea consistente
-          scale: 2 // Escala para una mejor resolución
-      }).then(canvas => {
-          const image = canvas.toDataURL('image/png');
+
+      html2canvas(tempWrapper, { backgroundColor: '#111827', scale: 2 })
+        .then(canvas => {
           const link = document.createElement('a');
           link.download = `lick-modal.png`;
-          link.href = image;
+          link.href = canvas.toDataURL('image/png');
           link.click();
-          tempWrapper.remove();
-      }).catch(err => {
-          console.error('Error al exportar la imagen:', err);
-          tempWrapper.remove();
-      });
+        })
+        .catch(err => console.error('Error exporting image:', err))
+        .finally(() => tempWrapper.remove());
     }
-    
-    // Funciones de actualización de UI
+
     function updatePlayButtons() {
-      // Botón del lick aleatorio
       const playRandomBtn = document.getElementById('play-lick-btn');
       if (playRandomBtn) {
         const playIcon = playRandomBtn.querySelector('.play-icon');
         const stopIcon = playRandomBtn.querySelector('.stop-icon');
         if (isLickPlaying && currentLickPlayingIndex === null) {
-          playRandomBtn.classList.remove('bg-pink-600', 'hover:bg-pink-700');
-          playRandomBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-          playRandomBtn.childNodes[3].nodeValue = 'Detener Lick';
+          playRandomBtn.classList.replace('bg-pink-600', 'bg-red-600');
+          playRandomBtn.classList.replace('hover:bg-pink-700', 'hover:bg-red-700');
           playIcon.classList.add('hidden');
           stopIcon.classList.remove('hidden');
         } else {
-          playRandomBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-          playRandomBtn.classList.add('bg-pink-600', 'hover:bg-pink-700');
-          playRandomBtn.childNodes[3].nodeValue = 'Tocar Lick';
+          playRandomBtn.classList.replace('bg-red-600', 'bg-pink-600');
+          playRandomBtn.classList.replace('hover:bg-red-700', 'hover:bg-pink-700');
           playIcon.classList.remove('hidden');
           stopIcon.classList.add('hidden');
         }
       }
 
-      // Botones de licks guardados
       savedLicks.forEach((_, index) => {
         const playBtn = document.getElementById(`play-saved-lick-btn-${index}`);
         if (playBtn) {
           const playIcon = playBtn.querySelector('.play-icon');
           const stopIcon = playBtn.querySelector('.stop-icon');
           if (isLickPlaying && currentLickPlayingIndex === index) {
-            playBtn.classList.remove('bg-pink-600', 'hover:bg-pink-700');
-            playBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            playBtn.classList.replace('bg-pink-600', 'bg-red-600');
+            playBtn.classList.replace('hover:bg-pink-700', 'hover:bg-red-700');
             playIcon.classList.add('hidden');
             stopIcon.classList.remove('hidden');
           } else {
-            playBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-            playBtn.classList.add('bg-pink-600', 'hover:bg-pink-700');
+            playBtn.classList.replace('bg-red-600', 'bg-pink-600');
+            playBtn.classList.replace('hover:bg-red-700', 'hover:bg-pink-700');
             playIcon.classList.remove('hidden');
             stopIcon.classList.add('hidden');
           }
@@ -676,109 +598,95 @@
     }
 
     function updateHighlightedNotes() {
-      // Limpiar todas las notas
-      document.querySelectorAll('[id^="random-note-"]').forEach(el => {
-        el.classList.remove('border-yellow-300', 'shadow-md', 'shadow-yellow-500', 'animate-pulse');
-        el.classList.add('border-transparent');
-      });
-      document.querySelectorAll('[id^="saved-note-"]').forEach(el => {
-        el.classList.remove('border-yellow-300', 'shadow-md', 'shadow-yellow-500', 'animate-pulse');
-        el.classList.add('border-transparent');
-      });
+      const lick = currentLickPlayingIndex === null ? randomLick : savedLicks[currentLickPlayingIndex]?.notes;
+      if (!lick) return;
 
-      // Iluminar la nota actual
-      if (isLickPlaying && currentPlayingNoteIndex !== null) {
-        let noteElement = null;
-        if (currentLickPlayingIndex === null) {
-          noteElement = document.getElementById(`random-note-${currentPlayingNoteIndex}`);
-        } else {
-          noteElement = document.getElementById(`saved-note-${currentLickPlayingIndex}-${currentPlayingNoteIndex}`);
-        }
+      const prefix = currentLickPlayingIndex === null ? 'random' : `saved-${currentLickPlayingIndex}`;
+      
+      for (let i = 0; i < lick.length; i++) {
+        const noteElement = document.getElementById(`${prefix}-note-${i}`);
         if (noteElement) {
-          noteElement.classList.add('border-yellow-300', 'shadow-md', 'shadow-yellow-500', 'animate-pulse');
-          noteElement.classList.remove('border-transparent');
+          noteElement.classList.toggle('animate-pulse', i === currentPlayingNoteIndex && isLickPlaying);
         }
       }
     }
 
-    // Función de inicialización de la aplicación al cargar la página
-    window.onload = function() {
+    window.onload = () => {
       try {
-        // Inicializar los iconos de Lucide
         lucide.createIcons();
-
-        // Inicializar el sintetizador
-        synth = new Tone.Synth({
-          oscillator: { type: 'triangle' },
-          envelope: { attack: 0.05, decay: 0.5, sustain: 0.5, release: 0.5 }
+        
+        // Sonido más cálido y profesional con Reverb
+        const reverb = new Tone.Reverb({
+            decay: 1.5,
+            wet: 0.3 // Un poco de reverb para dar espacio
         }).toDestination();
-        
-        // Cargar licks guardados de localStorage
-        const storedLicks = localStorage.getItem('savedModesLicks');
-        if (storedLicks) {
-          savedLicks = JSON.parse(storedLicks);
-        }
 
-        // Llenar los selectores de notas y modos
-        const rootSelect = document.getElementById('root-note');
-        if (rootSelect) {
-            NOTES.forEach(note => {
-                const option = document.createElement('option');
-                option.value = note;
-                option.textContent = note;
-                rootSelect.appendChild(option);
-            });
-        }
-
-        const modeSelect = document.getElementById('mode-type');
-        if (modeSelect) {
-            // Se limpian las opciones para generarlas de nuevo con los cambios
-            modeSelect.innerHTML = '';
-            Object.keys(MODE_FORMULAS).forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                modeSelect.appendChild(option);
-            });
-        }
-
-        // Añadir listeners para los cambios en los selectores
-        if (rootSelect && modeSelect) {
-            rootSelect.addEventListener('change', () => {
-                updateScaleAndChordDisplay(rootSelect.value, modeSelect.value);
-                generateLick();
-            });
-            modeSelect.addEventListener('change', () => {
-                updateScaleAndChordDisplay(rootSelect.value, modeSelect.value);
-                generateLick();
-            });
-        }
-
-        // Añadir listeners para el nuevo slider de longitud de lick
-        const lickLengthSlider = document.getElementById('lick-length-slider');
-        const lickLengthValue = document.getElementById('lick-length-value');
-        
-        if (lickLengthSlider && lickLengthValue) {
-            // Sincronizar el valor inicial
-            lickLengthValue.textContent = lickLengthSlider.value;
-            lickLengthSlider.addEventListener('input', () => {
-                lickLengthValue.textContent = lickLengthSlider.value;
-                generateLick();
-            });
-        }
-
-        // Añadir listeners para los botones de la sección de lick aleatorio
-        document.getElementById('generate-lick-btn')?.addEventListener('click', generateLick);
-        document.getElementById('save-lick-btn')?.addEventListener('click', saveCurrentLick);
-        document.getElementById('export-lick-btn')?.addEventListener('click', () => {
-            if (randomLick.length > 0) {
-                exportLickAsImage('random-lick-notes-container');
+        synth = new Tone.PolySynth(Tone.FMSynth, {
+            harmonicity: 2, // Menos metálico
+            modulationIndex: 10,
+            oscillator: {
+                type: "sine" // Onda base cálida
+            },
+            envelope: {
+                attack: 0.01,
+                decay: 0.2,
+                sustain: 0.3,
+                release: 0.8
+            },
+            modulation: {
+                type: "sine" // Modulación suave
+            },
+            modulationEnvelope: {
+                attack: 0.05,
+                decay: 0.1,
+                sustain: 0.5,
+                release: 0.8
             }
+        }).connect(reverb);
+
+        const storedLicks = localStorage.getItem('savedModesLicks');
+        if (storedLicks) savedLicks = JSON.parse(storedLicks);
+
+        const rootSelect = document.getElementById('root-note');
+        const modeSelect = document.getElementById('mode-type');
+
+        CHROMATIC_SHARPS.forEach(note => {
+          const option = document.createElement('option');
+          option.value = note;
+          option.textContent = note;
+          rootSelect.appendChild(option);
         });
         
-        // Renderizar la UI inicial
-        updateScaleAndChordDisplay(rootSelect.value, modeSelect.value);
-        generateLick();
+        Object.keys(MODE_FORMULAS).forEach(type => {
+          const option = document.createElement('option');
+          option.value = type;
+          option.textContent = type;
+          modeSelect.appendChild(option);
+        });
+
+        const updateAndGenerate = () => {
+          updateScaleAndChordDisplay(rootSelect.value, modeSelect.value);
+          generateLick();
+        };
+
+        rootSelect.addEventListener('change', updateAndGenerate);
+        modeSelect.addEventListener('change', updateAndGenerate);
+
+        const lickLengthSlider = document.getElementById('lick-length-slider');
+        const lickLengthValue = document.getElementById('lick-length-value');
+        lickLengthValue.textContent = lickLengthSlider.value;
+        lickLengthSlider.addEventListener('input', () => {
+            lickLengthValue.textContent = lickLengthSlider.value;
+            generateLick();
+        });
+
+        document.getElementById('generate-lick-btn').addEventListener('click', generateLick);
+        document.getElementById('save-lick-btn').addEventListener('click', saveCurrentLick);
+        document.getElementById('export-lick-btn').addEventListener('click', () => {
+            if (randomLick.length > 0) exportLickAsImage('random-lick-notes-container');
+        });
+        
+        updateAndGenerate();
         renderSavedLicks();
 
       } catch (e) {
