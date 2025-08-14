@@ -35,8 +35,10 @@
       animation: slideUp 0.6s ease-out 0.2s forwards;
       opacity: 0;
     }
-    .animate-pulse {
+    .animate-pulse-highlight {
         animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        border-color: #fcd34d !important;
+        box-shadow: 0 0 5px #fcd34d !important;
     }
     @keyframes pulse {
         0%, 100% {
@@ -48,6 +50,16 @@
             box-shadow: 0 0 15px rgba(252, 211, 77, 0.8);
         }
     }
+    
+    /* Clase para un contenedor de notas más compacto */
+    .note-container-compact {
+        display: flex;
+        flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
+        justify-content: center;
+        gap: 0.25rem; /* Espaciado aún más pequeño */
+        overflow-x: hidden; /* Oculta el scroll horizontal */
+    }
+
   </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col items-center p-4 pb-12">
@@ -55,18 +67,18 @@
     <h1 class="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">
       Laboratorio de Modos
     </h1>
-    <p class="text-center text-gray-400 max-w-xl mx-auto">
+    <p class="text-center text-gray-400 max-w-xl mx-auto text-sm">
       Selecciona una nota raíz y un tipo de modo para ver su escala y generar licks.
     </p>
 
     <div class="grid md:grid-cols-2 gap-6">
       <!-- Selector de Nota Raíz -->
       <div class="flex flex-col items-center">
-        <label for="root-note" class="text-xl font-bold mb-2 text-teal-300 flex items-center">
-          <i data-lucide="music-2" class="mr-2"></i> Nota Raíz
+        <label for="root-note" class="text-lg font-bold mb-2 text-teal-300 flex items-center">
+          <i data-lucide="music-2" class="mr-2 w-5 h-5"></i> Nota Raíz
         </label>
         <div class="relative w-full">
-          <select id="root-note" class="w-full bg-gray-700 text-white border-none rounded-xl p-3 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+          <select id="root-note" class="w-full bg-gray-700 text-white border-none rounded-xl p-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
             <!-- Opciones generadas por JavaScript -->
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
@@ -77,11 +89,11 @@
 
       <!-- Selector de Modo/Acorde -->
       <div class="flex flex-col items-center">
-        <label for="mode-type" class="text-xl font-bold mb-2 text-teal-300 flex items-center">
-          <i data-lucide="scale" class="mr-2"></i> Tipo de Modo
+        <label for="mode-type" class="text-lg font-bold mb-2 text-teal-300 flex items-center">
+          <i data-lucide="scale" class="mr-2 w-5 h-5"></i> Tipo de Modo
         </label>
         <div class="relative w-full">
-          <select id="mode-type" class="w-full bg-gray-700 text-white border-none rounded-xl p-3 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+          <select id="mode-type" class="w-full bg-gray-700 text-white border-none rounded-xl p-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
             <!-- Opciones generadas por JavaScript -->
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
@@ -106,22 +118,21 @@
 
       <!-- Control deslizante para la longitud del lick -->
       <div class="mb-6 w-full flex flex-col items-center">
-        <label for="lick-length-slider" class="text-lg font-semibold mb-2 text-gray-300 flex items-center">
-          <i data-lucide="grip-lines" class="mr-2"></i> Notas en el lick: <span id="lick-length-value" class="font-mono text-yellow-300 ml-2">4</span>
+        <label for="lick-length-slider" class="text-sm font-semibold mb-2 text-gray-300 flex items-center">
+          <i data-lucide="grip-lines" class="mr-2 w-4 h-4"></i> Notas en el lick: <span id="lick-length-value" class="font-mono text-yellow-300 ml-2">4</span>
         </label>
-        <!-- Rango del slider ajustado de 1 a 7 -->
         <input type="range" id="lick-length-slider" min="1" max="7" value="4" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       
       <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <button id="generate-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-purple-600 hover:bg-purple-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
-          <i data-lucide="dice-3" class="mr-2"></i> Generar Nuevo Lick
+        <button id="generate-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-purple-600 hover:bg-purple-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+          <i data-lucide="dice-3" class="mr-2 w-4 h-4"></i> Generar Nuevo Lick
         </button>
-        <button id="save-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-teal-600 hover:bg-teal-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
-          <i data-lucide="save" class="mr-2"></i> Guardar Lick
+        <button id="save-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-teal-600 hover:bg-teal-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
+          <i data-lucide="save" class="mr-2 w-4 h-4"></i> Guardar Lick
         </button>
-        <button id="export-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
-          <i data-lucide="download" class="mr-2"></i> Exportar
+        <button id="export-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
+          <i data-lucide="download" class="mr-2 w-4 h-4"></i> Exportar
         </button>
       </div>
       
@@ -183,7 +194,7 @@
       'maj7 (Lidio)': [0, 4, 7, 11],
       '7 (Mixolidio)': [0, 4, 7, 10],
       'm7 (Dórico)': [0, 3, 7, 10],
-      'm(b6) / maj7/3 (Eólico)': [0, 3, 7, 8],
+      'm(b6) / maj7/3 (Eólico)': [0, 3, 7, 10],
       '7(sus4) (Frigio)': [0, 5, 7, 10],
       'm7(b5) (Locrio)': [0, 3, 6, 10],
       'SubV7 (Sustituto tritonal)': [0, 4, 7, 10],
@@ -247,11 +258,12 @@
       const modeIntervals = INTERVAL_MAPS_BY_MODE[modeType];
 
       return intervals.map(intervalSemitone => {
-        const noteIndex = (rootSemitone + intervalSemitone) % 12;
+        const noteIndex = (rootSemitone + intervalSemitone + 12) % 12;
         let noteName = chromaticScale[noteIndex];
         
-        if (modeIntervals && modeIntervals[intervalSemitone]) {
+        if (modeIntervals && modeIntervals[intervalSemitone] !== undefined) {
           const intervalLabel = modeIntervals[intervalSemitone];
+          // Aquí se fuerza el uso de sostenidos o bemoles según el contexto
           if (intervalLabel.includes('#')) noteName = CHROMATIC_SHARPS[noteIndex];
           else if (intervalLabel.includes('b')) noteName = CHROMATIC_FLATS[noteIndex];
         }
@@ -300,29 +312,30 @@
           chordName = 'm(b6)';
       } else if (selectedModeType.includes('m7(b5)')) {
           chordName = 'm7(b5)';
-      } else {
+        } else {
           chordName = selectedModeType.split('(')[0].trim();
           if (selectedModeType.includes('sus4')) chordName += '(sus4)';
       }
 
       resultsSection.innerHTML = `
         <div class="flex justify-center items-center mb-4 space-x-2">
-          <h2 class="text-3xl font-extrabold text-white">${selectedRoot} ${chordName}</h2>
+          <h2 class="text-2xl font-extrabold text-white">${selectedRoot} ${chordName}</h2>
         </div>
-        <p class="text-center text-lg text-gray-300 mb-4 font-semibold">
-          Acorde: <span class="font-mono text-xl text-yellow-300">${chordNotes.join(', ')}</span>
+        <p class="text-center text-md text-gray-300 mb-2 font-semibold">
+          Acorde: <span class="font-mono text-lg text-yellow-300">${chordNotes.join(', ')}</span>
         </p>
         <hr class="border-gray-600 my-4" />
-        <p class="text-center text-lg text-gray-300 mb-2">${scaleNameDisplay}:</p>
-        <div class="flex justify-center flex-wrap gap-4 mt-4">
+        <p class="text-center text-sm text-gray-300 mb-2">${scaleNameDisplay}:</p>
+        <!-- Contenedor ajustado para mostrar las notas en una sola línea -->
+        <div class="note-container-compact py-2">
           ${modeNotes.map((note, index) => {
             const semitoneOffset = modeFormula[index];
             const originalIntervalName = INTERVAL_MAPS_BY_MODE[selectedModeType][semitoneOffset];
             const displayIntervalName = getDisplayIntervalName(originalIntervalName);
             return `
-              <div class="flex flex-col items-center p-2 rounded-lg bg-gray-800 w-20">
-                <span class="text-2xl font-bold text-teal-300">${note}</span>
-                <span class="text-sm text-gray-400">${displayIntervalName}</span>
+              <div class="flex flex-col items-center p-1 rounded-lg bg-gray-800 flex-1 min-w-0">
+                <span class="text-xs font-bold text-teal-300 text-center">${note}</span>
+                <span class="text-xs text-gray-400 text-center">${displayIntervalName}</span>
               </div>
             `;
           }).join('')}
@@ -342,18 +355,18 @@
       const displayIntervals = randomLickIntervals.map(getDisplayIntervalName);
 
       display.innerHTML = `
-        <div id="random-lick-notes-container" class="flex flex-wrap justify-center gap-2 mb-4 p-4 bg-gray-800 rounded-lg">
+        <div class="note-container-compact mb-4 p-2 bg-gray-800 rounded-lg" id="random-lick-notes-container">
           ${randomLick.map((note, index) => `
-            <div id="random-note-${index}" class="flex flex-col items-center p-2 rounded-lg bg-gray-900 w-20 transition-all duration-200">
-              <span class="text-2xl font-bold text-yellow-300">${note}</span>
-              <span class="text-sm text-gray-400">${displayIntervals[index]}</span>
+            <div id="random-note-${index}" class="flex flex-col items-center p-1 rounded-lg bg-gray-900 flex-1 min-w-0 transition-all duration-200">
+              <span class="text-xs font-bold text-yellow-300 text-center">${note}</span>
+              <span class="text-xs text-gray-400 text-center">${displayIntervals[index]}</span>
             </div>
           `).join('')}
         </div>
         <div class="flex justify-center items-center">
           <button id="play-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
-            <i data-lucide="play" class="mr-2 play-icon"></i>
-            <i data-lucide="stop-circle" class="mr-2 stop-icon hidden"></i>
+            <i data-lucide="play" class="mr-2 w-4 h-4 play-icon"></i>
+            <i data-lucide="stop-circle" class="mr-2 w-4 h-4 stop-icon hidden"></i>
             Tocar Lick
           </button>
         </div>
@@ -404,25 +417,26 @@
             <p class="text-lg font-bold text-teal-300 mb-2">
               ${lick.root} ${chordName} (${displayModeName}) Lick
             </p>
-            <div class="flex flex-wrap gap-2">
+            <!-- Contenedor ajustado para mostrar las notas en una sola línea -->
+            <div class="note-container-compact py-2">
               ${lick.notes.map((note, noteIndex) => `
-                <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-2 rounded-lg bg-gray-900 w-20 transition-all duration-200">
-                  <span class="text-xl font-bold text-yellow-300">${note}</span>
-                  <span class="text-xs text-gray-400">${displayIntervals[noteIndex]}</span>
+                <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-1 rounded-lg bg-gray-900 flex-1 min-w-0 transition-all duration-200">
+                  <span class="text-xs font-bold text-yellow-300 text-center">${note}</span>
+                  <span class="text-xs text-gray-400 text-center">${displayIntervals[noteIndex]}</span>
                 </div>
               `).join('')}
             </div>
           </div>
           <div class="flex items-center space-x-2 mt-4 md:mt-0 md:ml-4">
             <button id="play-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
-              <i data-lucide="play" class="play-icon"></i>
-              <i data-lucide="stop-circle" class="stop-icon hidden"></i>
+              <i data-lucide="play" class="play-icon w-4 h-4"></i>
+              <i data-lucide="stop-circle" class="stop-icon hidden w-4 h-4"></i>
             </button>
             <button id="export-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <i data-lucide="download"></i>
+              <i data-lucide="download" class="w-4 h-4"></i>
             </button>
             <button id="delete-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-red-400">
-              <i data-lucide="trash-2"></i>
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
@@ -460,25 +474,21 @@
       const modeNotes = getCorrectlySpelledNotes(selectedRoot, modeFormula, selectedModeType);
       if (modeNotes.length === 0) return;
 
-      // Crear una copia de las notas para elegir sin repetición
       const availableNotes = [...modeNotes];
-
+      // El valor del slider determina cuántas notas se generan.
       const lickLength = parseInt(document.getElementById('lick-length-slider').value, 10);
       randomLick = [];
       randomLickIntervals = [];
       
-      // Asegurarse de que la longitud del lick no exceda las notas disponibles
       const finalLickLength = Math.min(lickLength, availableNotes.length);
 
       for (let i = 0; i < finalLickLength; i++) {
-        // Elegir un índice aleatorio de las notas *restantes*
         const randomIndex = Math.floor(Math.random() * availableNotes.length);
         const noteName = availableNotes[randomIndex];
         
         randomLick.push(noteName);
         randomLickIntervals.push(getIntervalName(selectedModeType, selectedRoot, noteName));
 
-        // Eliminar la nota elegida para que no se pueda volver a seleccionar
         availableNotes.splice(randomIndex, 1);
       }
       renderRandomLick();
@@ -540,7 +550,8 @@
       if (!lickContainer) return;
       
       const tempWrapper = document.createElement('div');
-      const clone = lickContainer.cloneNode(true);
+      const lickElement = lickContainer.closest('.bg-gray-800');
+      const clone = lickElement.cloneNode(true);
       
       tempWrapper.style.padding = '2rem';
       tempWrapper.style.backgroundColor = '#1f2937';
@@ -598,16 +609,20 @@
     }
 
     function updateHighlightedNotes() {
-      const lick = currentLickPlayingIndex === null ? randomLick : savedLicks[currentLickPlayingIndex]?.notes;
-      if (!lick) return;
+      // Remover el highlight de todas las notas antes de añadirlo a la actual
+      const allLickNotes = document.querySelectorAll('#random-lick-notes-container div, #saved-licks-container .flex-wrap div');
+      allLickNotes.forEach(noteElement => {
+        noteElement.classList.remove('animate-pulse-highlight');
+      });
 
-      const prefix = currentLickPlayingIndex === null ? 'random' : `saved-${currentLickPlayingIndex}`;
+      // Si no se está tocando nada, salimos
+      if (!isLickPlaying || currentPlayingNoteIndex === null) return;
       
-      for (let i = 0; i < lick.length; i++) {
-        const noteElement = document.getElementById(`${prefix}-note-${i}`);
-        if (noteElement) {
-          noteElement.classList.toggle('animate-pulse', i === currentPlayingNoteIndex && isLickPlaying);
-        }
+      const prefix = currentLickPlayingIndex === null ? 'random' : `saved-${currentLickPlayingIndex}`;
+      const noteElement = document.getElementById(`${prefix}-note-${currentPlayingNoteIndex}`);
+      
+      if (noteElement) {
+        noteElement.classList.add('animate-pulse-highlight');
       }
     }
 
@@ -703,3 +718,5 @@
   </script>
 </body>
 </html>
+
+
