@@ -57,9 +57,7 @@
     /* Contenedor flexible para las notas de la escala y los licks */
     .note-container-flex {
         display: flex;
-        flex-wrap: nowrap; /* Mantiene los elementos en una sola línea */
-        overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
-        -webkit-overflow-scrolling: touch; /* Mejora el desplazamiento en iOS */
+        flex-wrap: wrap; /* Permite que los elementos se envuelvan a una nueva línea */
         gap: 0.5rem; /* Espacio entre las notas */
         justify-content: center; /* ALINEACIÓN CENTRADA PARA LAS NOTAS */
         padding: 0.5rem; /* Padding para que el contenido no se pegue a los bordes */
@@ -97,10 +95,6 @@
       background-color: #111827; /* bg-gray-900 */
     }
     
-    /* Esconder la barra de desplazamiento en webkit (Chrome, Safari) */
-    .note-container-flex::-webkit-scrollbar {
-        display: none;
-    }
     /* Estilos para el input de rango */
     input[type=range]::-webkit-slider-thumb {
       background: #6ee7b7;
