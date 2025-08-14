@@ -72,16 +72,18 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0; /* Evita que las tarjetas se encojan */
-        min-width: 4rem; /* Ancho mínimo para que las tarjetas no sean demasiado pequeñas */
-        height: 4rem;
+        /* Ajuste para dispositivos móviles */
+        min-width: 3.5rem; /* Ancho mínimo para que quepan más notas */
+        height: 3.5rem;
         background-color: #1f2937; /* bg-gray-800 */
         border-radius: 0.75rem; /* rounded-xl */
         padding: 0.5rem;
         border: 2px solid transparent;
         transition: all 0.2s ease-in-out;
     }
+
     .note-card .note-name {
-        font-size: 1.125rem; /* text-lg */
+        font-size: 1rem; /* text-lg */
         font-weight: 700; /* font-bold */
         color: #6ee7b7; /* text-teal-300 */
         line-height: 1;
