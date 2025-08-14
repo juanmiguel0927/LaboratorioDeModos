@@ -62,7 +62,7 @@
         -webkit-overflow-scrolling: touch; /* Mejora el desplazamiento en iOS */
         gap: 0.5rem; /* Espacio entre las notas */
         justify-content: center; /* ALINEACIÓN CENTRADA PARA LAS NOTAS */
-        padding-bottom: 0.5rem; /* Espacio para la barra de desplazamiento si aparece */
+        padding: 0.5rem; /* Padding para que el contenido no se pegue a los bordes */
     }
     
     /* Estilo para las tarjetas de las notas */
@@ -72,7 +72,6 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0; /* Evita que las tarjetas se encojan */
-        /* Ajuste para dispositivos móviles */
         min-width: 3.5rem; /* Ancho mínimo para que quepan más notas */
         height: 3.5rem;
         background-color: #1f2937; /* bg-gray-800 */
@@ -117,7 +116,7 @@
   </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col items-center p-4 pb-12">
-  <div id="app-container" class="bg-gray-800 shadow-2xl rounded-3xl p-8 max-w-4xl w-full flex flex-col space-y-8 animate-fade-in">
+  <div id="app-container" class="bg-gray-800 shadow-2xl rounded-3xl p-4 md:p-8 max-w-4xl w-full flex flex-col space-y-8 animate-fade-in">
     <h1 class="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">
       Laboratorio de Modos
     </h1>
