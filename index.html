@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.58/build/Tone.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
+    /* Importación de fuentes para un estilo limpio y moderno */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap');
     
     body {
@@ -20,6 +21,7 @@
       font-family: 'Roboto Mono', monospace;
     }
     
+    /* Animaciones para una interfaz dinámica */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -35,6 +37,7 @@
       animation: slideUp 0.6s ease-out 0.2s forwards;
       opacity: 0;
     }
+    /* Estilo de resalte para la nota que está sonando */
     .animate-pulse-highlight {
         animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         border-color: #fcd34d !important;
@@ -51,15 +54,64 @@
         }
     }
     
-    /* Clase para un contenedor de notas más compacto */
-    .note-container-compact {
+    /* Contenedor flexible para las notas de la escala y los licks */
+    .note-container-flex {
         display: flex;
-        flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
-        justify-content: center;
-        gap: 0.25rem; /* Espaciado aún más pequeño */
-        overflow-x: hidden; /* Oculta el scroll horizontal */
+        flex-wrap: nowrap; /* Mantiene los elementos en una sola línea */
+        overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
+        -webkit-overflow-scrolling: touch; /* Mejora el desplazamiento en iOS */
+        gap: 0.5rem; /* Espacio entre las notas */
+        justify-content: center; /* ALINEACIÓN CENTRADA PARA LAS NOTAS */
+        padding-bottom: 0.5rem; /* Espacio para la barra de desplazamiento si aparece */
     }
-
+    
+    /* Estilo para las tarjetas de las notas */
+    .note-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0; /* Evita que las tarjetas se encojan */
+        min-width: 4rem; /* Ancho mínimo para que las tarjetas no sean demasiado pequeñas */
+        height: 4rem;
+        background-color: #1f2937; /* bg-gray-800 */
+        border-radius: 0.75rem; /* rounded-xl */
+        padding: 0.5rem;
+        border: 2px solid transparent;
+        transition: all 0.2s ease-in-out;
+    }
+    .note-card .note-name {
+        font-size: 1.125rem; /* text-lg */
+        font-weight: 700; /* font-bold */
+        color: #6ee7b7; /* text-teal-300 */
+        line-height: 1;
+    }
+    .note-card .interval-name {
+        font-size: 0.75rem; /* text-xs */
+        color: #9ca3af; /* text-gray-400 */
+        line-height: 1;
+    }
+    
+    .slick-note {
+      background-color: #111827; /* bg-gray-900 */
+    }
+    
+    /* Esconder la barra de desplazamiento en webkit (Chrome, Safari) */
+    .note-container-flex::-webkit-scrollbar {
+        display: none;
+    }
+    /* Estilos para el input de rango */
+    input[type=range]::-webkit-slider-thumb {
+      background: #6ee7b7;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(110, 231, 183, 0.5);
+    }
+    
+    input[type=range]::-moz-range-thumb {
+      background: #6ee7b7;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(110, 231, 183, 0.5);
+    }
   </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col items-center p-4 pb-12">
@@ -103,7 +155,7 @@
       </div>
     </div>
 
-    <!-- Sección de Resultados -->
+    <!-- Sección de Resultados (Escala y Acorde) -->
     <div id="results-section" class="bg-gray-700 p-6 rounded-2xl mt-8 shadow-inner animate-slide-up">
       <!-- Contenido generado por JavaScript -->
     </div>
@@ -119,19 +171,19 @@
       <!-- Control deslizante para la longitud del lick -->
       <div class="mb-6 w-full flex flex-col items-center">
         <label for="lick-length-slider" class="text-sm font-semibold mb-2 text-gray-300 flex items-center">
-          <i data-lucide="grip-lines" class="mr-2 w-4 h-4"></i> Notas en el lick: <span id="lick-length-value" class="font-mono text-yellow-300 ml-2">4</span>
+          <i data-lucide="grip-lines" class="mr-2 w-4 h-4"></i> Notas en el lick: <span id="lick-length-value" class="font-mono text-yellow-300 ml-2">7</span>
         </label>
-        <input type="range" id="lick-length-slider" min="1" max="7" value="4" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="range" id="lick-length-slider" min="1" max="7" value="7" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       
       <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <button id="generate-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-purple-600 hover:bg-purple-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+        <button id="generate-lick-btn" class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 rounded-full transition-all duration-300 bg-purple-600 hover:bg-purple-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
           <i data-lucide="dice-3" class="mr-2 w-4 h-4"></i> Generar Nuevo Lick
         </button>
-        <button id="save-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-teal-600 hover:bg-teal-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
+        <button id="save-lick-btn" class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 rounded-full transition-all duration-300 bg-teal-600 hover:bg-teal-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
           <i data-lucide="save" class="mr-2 w-4 h-4"></i> Guardar Lick
         </button>
-        <button id="export-lick-btn" class="flex items-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
+        <button id="export-lick-btn" class="flex-1 md:flex-none flex items-center justify-center px-4 py-2 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed">
           <i data-lucide="download" class="mr-2 w-4 h-4"></i> Exportar
         </button>
       </div>
@@ -239,6 +291,7 @@
       'V7/VI (Mixolidio b9 b13)': { 0: '1', 1: 'b2', 4: '3', 5: '4', 7: '5', 8: 'b6', 10: 'b7' }
     };
     
+    // Mapeo de intervalos para mostrar grados extendidos (9, 11, 13)
     const degreeMap = {
       '2': '9', 'b2': 'b9', '4': '11', '#4': '#11', '6': '13', 'b6': 'b13',
     };
@@ -247,10 +300,12 @@
         return degreeMap[originalInterval] || originalInterval;
     }
 
+    // Determina si una clave es sostenida o bemol
     function isSharpKey(root) {
       return ['C', 'C#', 'D', 'E', 'F#', 'G', 'A', 'B'].includes(root);
     }
 
+    // Obtiene las notas de la escala con la ortografía correcta (sostenidos o bemoles)
     function getCorrectlySpelledNotes(root, intervals, modeType) {
       const isSharp = isSharpKey(root);
       const chromaticScale = isSharp ? CHROMATIC_SHARPS : CHROMATIC_FLATS;
@@ -263,7 +318,7 @@
         
         if (modeIntervals && modeIntervals[intervalSemitone] !== undefined) {
           const intervalLabel = modeIntervals[intervalSemitone];
-          // Aquí se fuerza el uso de sostenidos o bemoles según el contexto
+          // Forzar sostenidos o bemoles según el intervalo del modo
           if (intervalLabel.includes('#')) noteName = CHROMATIC_SHARPS[noteIndex];
           else if (intervalLabel.includes('b')) noteName = CHROMATIC_FLATS[noteIndex];
         }
@@ -271,6 +326,7 @@
       });
     }
     
+    // Obtiene el nombre del intervalo entre dos notas
     function getIntervalName(modeType, rootNote, targetNote) {
       const rootSemitone = NOTE_TO_SEMITONE_MAP[rootNote];
       const targetSemitone = NOTE_TO_SEMITONE_MAP[targetNote];
@@ -279,6 +335,7 @@
       return INTERVAL_MAPS_BY_MODE[modeType][semitoneOffset] || 'Error';
     }
 
+    // Actualiza la visualización de la escala y el acorde
     function updateScaleAndChordDisplay(selectedRoot, selectedModeType) {
       const modeFormula = MODE_FORMULAS[selectedModeType];
       const chordFormula = CHORD_FORMULAS[selectedModeType];
@@ -326,16 +383,15 @@
         </p>
         <hr class="border-gray-600 my-4" />
         <p class="text-center text-sm text-gray-300 mb-2">${scaleNameDisplay}:</p>
-        <!-- Contenedor ajustado para mostrar las notas en una sola línea -->
-        <div class="note-container-compact py-2">
+        <div class="note-container-flex py-2">
           ${modeNotes.map((note, index) => {
             const semitoneOffset = modeFormula[index];
             const originalIntervalName = INTERVAL_MAPS_BY_MODE[selectedModeType][semitoneOffset];
             const displayIntervalName = getDisplayIntervalName(originalIntervalName);
             return `
-              <div class="flex flex-col items-center p-1 rounded-lg bg-gray-800 flex-1 min-w-0">
-                <span class="text-xs font-bold text-teal-300 text-center">${note}</span>
-                <span class="text-xs text-gray-400 text-center">${displayIntervalName}</span>
+              <div class="note-card">
+                <span class="note-name">${note}</span>
+                <span class="interval-name">${displayIntervalName}</span>
               </div>
             `;
           }).join('')}
@@ -343,6 +399,7 @@
       `;
     }
 
+    // Renderiza el lick aleatorio en la interfaz
     function renderRandomLick() {
       const display = document.getElementById('random-lick-display');
       if (randomLick.length === 0) {
@@ -355,11 +412,11 @@
       const displayIntervals = randomLickIntervals.map(getDisplayIntervalName);
 
       display.innerHTML = `
-        <div class="note-container-compact mb-4 p-2 bg-gray-800 rounded-lg" id="random-lick-notes-container">
+        <div class="note-container-flex mb-4 p-2 bg-gray-800 rounded-lg" id="random-lick-notes-container">
           ${randomLick.map((note, index) => `
-            <div id="random-note-${index}" class="flex flex-col items-center p-1 rounded-lg bg-gray-900 flex-1 min-w-0 transition-all duration-200">
-              <span class="text-xs font-bold text-yellow-300 text-center">${note}</span>
-              <span class="text-xs text-gray-400 text-center">${displayIntervals[index]}</span>
+            <div id="random-note-${index}" class="note-card slick-note">
+              <span class="note-name text-yellow-300">${note}</span>
+              <span class="interval-name">${displayIntervals[index]}</span>
             </div>
           `).join('')}
         </div>
@@ -379,6 +436,7 @@
       document.getElementById('play-lick-btn').addEventListener('click', () => playLick(randomLick));
     }
 
+    // Obtiene un nombre de modo más simple para la visualización
     function getDisplayModeName(modeString) {
       if (modeString.includes('SubV7')) return 'Mixolidia #11';
       if (modeString.includes('Eólico')) return 'Eólica';
@@ -389,6 +447,7 @@
       return modeString.split('(')[1]?.replace(')', '') || 'Modo';
     }
 
+    // Renderiza la lista de licks guardados
     function renderSavedLicks() {
       const container = document.getElementById('saved-licks-container');
       container.innerHTML = savedLicks.length > 0 ? '' : '<p class="text-center text-gray-400">No hay licks guardados.</p>';
@@ -414,20 +473,19 @@
 
         lickElement.innerHTML = `
           <div class="flex-grow" id="saved-lick-content-${lickIndex}">
-            <p class="text-lg font-bold text-teal-300 mb-2">
+            <p class="text-lg font-bold text-teal-300 mb-2 text-center md:text-left">
               ${lick.root} ${chordName} (${displayModeName}) Lick
             </p>
-            <!-- Contenedor ajustado para mostrar las notas en una sola línea -->
-            <div class="note-container-compact py-2">
+            <div class="note-container-flex py-2">
               ${lick.notes.map((note, noteIndex) => `
-                <div id="saved-note-${lickIndex}-${noteIndex}" class="flex flex-col items-center p-1 rounded-lg bg-gray-900 flex-1 min-w-0 transition-all duration-200">
-                  <span class="text-xs font-bold text-yellow-300 text-center">${note}</span>
-                  <span class="text-xs text-gray-400 text-center">${displayIntervals[noteIndex]}</span>
+                <div id="saved-note-${lickIndex}-${noteIndex}" class="note-card slick-note">
+                  <span class="note-name text-yellow-300">${note}</span>
+                  <span class="interval-name">${displayIntervals[noteIndex]}</span>
                 </div>
               `).join('')}
             </div>
           </div>
-          <div class="flex items-center space-x-2 mt-4 md:mt-0 md:ml-4">
+          <div class="flex items-center justify-center md:justify-end space-x-2 mt-4 md:mt-0 md:ml-4">
             <button id="play-saved-lick-btn-${lickIndex}" class="p-2 rounded-full transition-all duration-300 bg-pink-600 hover:bg-pink-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
               <i data-lucide="play" class="play-icon w-4 h-4"></i>
               <i data-lucide="stop-circle" class="stop-icon hidden w-4 h-4"></i>
@@ -452,6 +510,7 @@
       });
     }
 
+    // Detiene la reproducción del lick
     function stopLick() {
       if (lickSequence) {
         lickSequence.dispose();
@@ -466,6 +525,7 @@
       updateHighlightedNotes();
     }
 
+    // Genera un lick aleatorio
     function generateLick() {
       stopLick();
       const selectedRoot = document.getElementById('root-note').value;
@@ -494,6 +554,7 @@
       renderRandomLick();
     }
 
+    // Toca la secuencia de notas del lick
     async function playLick(lickToPlay, lickIndex = null) {
       if (isLickPlaying && currentLickPlayingIndex === lickIndex) {
         stopLick();
@@ -527,6 +588,7 @@
       Tone.Transport.scheduleOnce(() => stopLick(), `+${totalDuration}`);
     }
 
+    // Guarda el lick actual en el almacenamiento local
     function saveCurrentLick() {
       if (randomLick.length === 0) return;
       savedLicks.push({
@@ -539,18 +601,23 @@
       renderSavedLicks();
     }
 
+    // Elimina un lick guardado
     function deleteSavedLick(indexToDelete) {
       savedLicks.splice(indexToDelete, 1);
       localStorage.setItem('savedModesLicks', JSON.stringify(savedLicks));
       renderSavedLicks();
     }
     
+    // Exporta un lick como imagen
     function exportLickAsImage(containerId) {
       const lickContainer = document.getElementById(containerId);
       if (!lickContainer) return;
       
       const tempWrapper = document.createElement('div');
-      const lickElement = lickContainer.closest('.bg-gray-800');
+      // Encontrar el elemento padre correcto para capturar todo el contexto del lick
+      const lickElement = lickContainer.closest('.bg-gray-800, .bg-gray-700');
+      if (!lickElement) return;
+
       const clone = lickElement.cloneNode(true);
       
       tempWrapper.style.padding = '2rem';
@@ -570,6 +637,7 @@
         .finally(() => tempWrapper.remove());
     }
 
+    // Actualiza los iconos de los botones de reproducción
     function updatePlayButtons() {
       const playRandomBtn = document.getElementById('play-lick-btn');
       if (playRandomBtn) {
@@ -608,9 +676,10 @@
       });
     }
 
+    // Resalta la nota que se está tocando
     function updateHighlightedNotes() {
       // Remover el highlight de todas las notas antes de añadirlo a la actual
-      const allLickNotes = document.querySelectorAll('#random-lick-notes-container div, #saved-licks-container .flex-wrap div');
+      const allLickNotes = document.querySelectorAll('.slick-note');
       allLickNotes.forEach(noteElement => {
         noteElement.classList.remove('animate-pulse-highlight');
       });
@@ -630,7 +699,7 @@
       try {
         lucide.createIcons();
         
-        // Sonido más cálido y profesional con Reverb
+        // Configuración de un sintetizador más cálido y profesional con Reverb
         const reverb = new Tone.Reverb({
             decay: 1.5,
             wet: 0.3 // Un poco de reverb para dar espacio
@@ -718,5 +787,3 @@
   </script>
 </body>
 </html>
-
-
